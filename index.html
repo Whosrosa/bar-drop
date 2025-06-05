@@ -1,469 +1,113 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Barista Drag & Drop Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 640px;
-      margin: 20px auto;
-      padding: 0 15px;
-      background: #fff8f0;
-      color: #4b2e05;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .cups-container {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .cup {
-      cursor: pointer;
-      border: 2px solid #4b2e05;
-      border-radius: 8px;
-      padding: 15px;
-      width: 90px;
-      height: 120px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
-      user-select: none;
-      transition: transform 0.3s ease;
-      box-sizing: border-box;
-    }
-    /* Dark cups: Hot */
-    .cup.hot {
-      background: #6f4e37;
-      color: #fff;
-    }
-    /* Light cups: Iced */
-    .cup.iced {
-      background: #d2b48c;
-      color: #4b2e05;
-    }
-    /* Sizes */
-    .cup.small {
-      width: 70px;
-      height: 100px;
-    }
-    .cup.medium {
-      width: 90px;
-      height: 120px;
-    }
-    .cup.large {
-      width: 110px;
-      height: 140px;
-    }
-    /* Selected cup enlarged */
-    .selected-cup {
-      position: fixed;
-      left: 20px;
-      top: 80px;
-      width: 160px !important;
-      height: 220px !important;
-      border-color: #c06c4c;
-      box-shadow: 0 0 15px #c06c4c;
-      z-index: 1000;
-      pointer-events: none;
-    }
-    /* Ingredients container */
-    .ingredients-container {
-      display: none;
-      margin-top: 30px;
-      border-top: 2px solid #4b2e05;
-      padding-top: 15px;
-    }
-    .ingredients-section {
-      margin-bottom: 25px;
-    }
-    .ingredient {
-      display: inline-block;
-      padding: 8px 12px;
-      margin: 6px;
-      border: 2px solid #4b2e05;
-      border-radius: 6px;
-      background: #fff8f0;
-      cursor: grab;
-      user-select: none;
-      transition: background-color 0.2s ease;
-    }
-    .ingredient.dragging {
-      opacity: 0.6;
-      cursor: grabbing;
-      background-color: #d4a373;
-      color: #fff;
-    }
-    /* Cup drop area */
-    #cup-drop-area {
-      position: fixed;
-      left: 220px;
-      top: 80px;
-      width: 160px;
-      height: 220px;
-      border: 3px dashed #4b2e05;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 10px;
-      background: #fff8f0;
-      box-sizing: border-box;
-    }
-    #cup-drop-area p {
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #4b2e05;
-    }
-    .dropped-ingredient {
-      margin: 3px 0;
-      padding: 4px 6px;
-      background: #c06c4c;
-      color: white;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      user-select: none;
-      width: 140px;
-      text-align: center;
-    }
-    /* Result message */
-    #result {
-      margin-top: 260px;
-      min-height: 1.5em;
-      font-weight: bold;
-      font-size: 1.1rem;
-      text-align: center;
-      color: #4b2e05;
-    }
-    /* Buttons */
-    #nextOrder {
-      margin-top: 15px;
-      display: none;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: 2px solid #4b2e05;
-      background: #fff8f0;
-      color: #4b2e05;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #nextOrder:hover {
-      background: #c06c4c;
-      color: white;
-      border-color: #c06c4c;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Barista Drag & Drop Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f0f0f0;
+  }
+  h1 {
+    text-align: center;
+  }
+  #orders {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .cups {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .cup {
+    width: 80px;
+    height: 140px;
+    border: 2px solid #444;
+    border-radius: 15px;
+    background: #fff;
+    text-align: center;
+    line-height: 140px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    font-weight: bold;
+    color: #555;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  }
+  .cup.selected {
+    border-color: #007bff;
+    box-shadow: 0 0 10px #007bff;
+  }
+  #ingredients {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .ingredient {
+    width: 60px;
+    height: 60px;
+    background: #eee;
+    border: 2px solid #666;
+    border-radius: 8px;
+    text-align: center;
+    line-height: 60px;
+    cursor: grab;
+    user-select: none;
+    font-weight: bold;
+    color: #333;
+  }
+  .ingredient.dragging {
+    opacity: 0.5;
+  }
+  #cup-drop-area {
+    width: 100px;
+    height: 140px;
+    border: 3px dashed #888;
+    border-radius: 15px;
+    margin: 0 auto 20px auto;
+    background: #fff;
+    position: relative;
+  }
+  #cup-drop-area .drop-text {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    color: #aaa;
+    font-style: italic;
+  }
+  #dropped-ingredients {
+    min-height: 30px;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #444;
+    text-align: center;
+  }
+  #next-order-btn {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    visibility: hidden;
+  }
+  #next-order-btn:hover {
+    background: #0056b3;
+  }
+</style>
 </head>
 <body>
 
-<h2 id="orderInstruction">Loading order...</h2>
+<h1>Barista Drag & Drop Game</h1>
 
-<div class="cups-container" id="cupsContainer">
-  <!-- Cups will be dynamically inserted here -->
-</div>
-
-<!-- The selected cup enlarged & fixed -->
-<div id="cupDropArea" style="display:none;">
-  <p>Drag ingredients here:</p>
-</div>
-
-<!-- Ingredients -->
-<div class="ingredients-container" id="ingredientsContainer">
-  <div class="ingredients-section">
-    <strong>Espresso Shots:</strong><br/>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="standard" data-count="1">Std 1 shot</div>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="standard" data-count="2">Std 2 shots</div>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="standard" data-count="3">Std 3 shots</div>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="blonde" data-count="1">Blonde 1 shot</div>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="blonde" data-count="2">Blonde 2 shots</div>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="blonde" data-count="3">Blonde 3 shots</div>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="decaf" data-count="1">Decaf 1 shot</div>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="decaf" data-count="2">Decaf 2 shots</div>
-    <div class="ingredient" draggable="true" data-type="espresso" data-shot-type="decaf" data-count="3">Decaf 3 shots</div>
-  </div>
-
-  <div class="ingredients-section">
-    <strong>Vanilla Pumps:</strong><br/>
-    <div class="ingredient" draggable="true" data-type="vanilla" data-count="1">1 pump</div>
-    <div class="ingredient" draggable="true" data-type="vanilla" data-count="2">2 pumps</div>
-    <div class="ingredient" draggable="true" data-type="vanilla" data-count="3">3 pumps</div>
-    <div class="ingredient" draggable="true" data-type="vanilla" data-count="4">4 pumps</div>
-    <div class="ingredient" draggable="true" data-type="vanilla" data-count="5">5 pumps</div>
-  </div>
-
-  <div class="ingredients-section">
-    <strong>Milk:</strong><br/>
-    <div class="ingredient" draggable="true" data-type="milk" data-milk-type="whole" data-temp="steamed">Steamed Whole</div>
-    <div class="ingredient" draggable="true" data-type="milk" data-milk-type="coconut" data-temp="cold">Cold Coconut</div>
-    <div class="ingredient" draggable="true" data-type="milk" data-milk-type="2%" data-temp="steamed">Steamed 2%</div>
-    <div class="ingredient" draggable="true" data-type="milk" data-milk-type="soy" data-temp="cold">Cold Soy</div>
-    <div class="ingredient" draggable="true" data-type="milk" data-milk-type="almond" data-temp="steamed">Steamed Almond</div>
-    <div class="ingredient" draggable="true" data-type="milk" data-milk-type="oat" data-temp="cold">Cold Oat</div>
-  </div>
-</div>
-
-<div id="result"></div>
-<button id="nextOrder">Next Order</button>
-
-<script>
-  // Orders with instructions
-  const orders = [
-    {
-      name: "Vanilla Latte",
-      cupSize: "Medium",
-      cupTemp: "Hot",
-      espresso: { type: "standard", count: 2 },
-      vanillaPumps: 4,
-      milk: { type: "2%", temp: "steamed" }
-    },
-    {
-      name: "Iced Coconut Macchiato",
-      cupSize: "Large",
-      cupTemp: "Iced",
-      espresso: { type: "blonde", count: 3 },
-      vanillaPumps: 2,
-      milk: { type: "coconut", temp: "cold" }
-    },
-    {
-      name: "Decaf Flat White",
-      cupSize: "Small",
-      cupTemp: "Hot",
-      espresso: { type: "decaf", count: 2 },
-      vanillaPumps: 0,
-      milk: { type: "whole", temp: "steamed" }
-    },
-  ];
-
-  let currentIndex = 0;
-  let currentOrder = orders[currentIndex];
-  let cupSelected = null;
-  let droppedIngredients = {
-    espresso: null,
-    vanilla: 0,
-    milk: null,
-  };
-
-  // DOM references
-  const orderInstruction = document.getElementById('orderInstruction');
-  const cupsContainer = document.getElementById('cupsContainer');
-  const ingredientsContainer = document.getElementById('ingredientsContainer');
-  const cupDropArea = document.getElementById('cupDropArea');
-  const result = document.getElementById('result');
-  const nextOrderBtn = document.getElementById('nextOrder');
-
-  // Define cups data
-  const cupsData = [
-    { id: 'smallHot', size: 'Small', temp: 'Hot', label: 'Small Hot', dark: true },
-    { id: 'mediumHot', size: 'Medium', temp: 'Hot', label: 'Medium Hot', dark: true },
-    { id: 'largeHot', size: 'Large', temp: 'Hot', label: 'Large Hot', dark: true },
-    { id: 'smallIced', size: 'Small', temp: 'Iced', label: 'Small Iced', dark: false },
-    { id: 'mediumIced', size: 'Medium', temp: 'Iced', label: 'Medium Iced', dark: false },
-    { id: 'largeIced', size: 'Large', temp: 'Iced', label: 'Large Iced', dark: false },
-  ];
-
-  // Create cup elements
-  function renderCups() {
-    cupsContainer.innerHTML = '';
-    cupsData.forEach(cup => {
-      const div = document.createElement('div');
-      div.classList.add('cup');
-      div.classList.add(cup.dark ? 'hot' : 'iced');
-      div.classList.add(cup.size.toLowerCase());
-      div.textContent = cup.label;
-      div.dataset.size = cup.size;
-      div.dataset.temp = cup.temp;
-      div.id = cup.id;
-      div.addEventListener('click', () => selectCup(cup));
-      cupsContainer.appendChild(div);
-    });
-  }
-
-  // When player selects a cup
-  function selectCup(cup) {
-    if (cupSelected) return; // Only one cup selection allowed
-
-    cupSelected = cup;
-    // Remove all cups except selected
-    cupsData.forEach(c => {
-      if (c.id !== cup.id) {
-        const elem = document.getElementById(c.id);
-        if (elem) elem.style.display = 'none';
-      }
-    });
-
-    // Enlarge selected cup & move to left fixed area
-    const selectedCupElem = document.getElementById(cup.id);
-    selectedCupElem.classList.add('selected-cup');
-
-    // Show drop area and ingredients
-    cupDropArea.style.display = 'flex';
-    ingredientsContainer.style.display = 'block';
-    orderInstruction.textContent = `Make a ${currentOrder.cupSize} ${currentOrder.cupTemp} ${currentOrder.name}. Drag ingredients onto the cup.`;
-
-    // Clear previous dropped ingredients
-    cupDropArea.querySelectorAll('.dropped-ingredient').forEach(el => el.remove());
-
-    result.textContent = '';
-    nextOrderBtn.style.display = 'none';
-
-    // Reset dropped ingredients tracker
-    droppedIngredients = { espresso: null, vanilla: 0, milk: null };
-  }
-
-  // Drag and drop logic
-  let draggedIngredient = null;
-
-  ingredientsContainer.querySelectorAll('.ingredient').forEach(elem => {
-    elem.addEventListener('dragstart', e => {
-      draggedIngredient = e.target;
-      e.target.classList.add('dragging');
-    });
-    elem.addEventListener('dragend', e => {
-      e.target.classList.remove('dragging');
-      draggedIngredient = null;
-    });
-  });
-
-  cupDropArea.addEventListener('dragover', e => {
-    e.preventDefault();
-  });
-
-  cupDropArea.addEventListener('drop', e => {
-    e.preventDefault();
-    if (!draggedIngredient) return;
-
-    const type = draggedIngredient.dataset.type;
-
-    // Handle espresso shots
-    if (type === 'espresso') {
-      const shotType = draggedIngredient.dataset['shotType'];
-      const count = Number(draggedIngredient.dataset['count']);
-      if (droppedIngredients.espresso) {
-        alert('You already added espresso shots!');
-        return;
-      }
-      droppedIngredients.espresso = { type: shotType, count: count };
-      addIngredientToCup(`${count} ${capitalize(shotType)} espresso shot(s)`);
-      checkIfComplete();
-      return;
-    }
-
-    // Handle vanilla pumps
-    if (type === 'vanilla') {
-      const count = Number(draggedIngredient.dataset['count']);
-      if (droppedIngredients.vanilla > 0) {
-        alert('You already added vanilla pumps!');
-        return;
-      }
-      droppedIngredients.vanilla = count;
-      addIngredientToCup(`${count} vanilla pump(s)`);
-      checkIfComplete();
-      return;
-    }
-
-    // Handle milk
-    if (type === 'milk') {
-      if (droppedIngredients.milk) {
-        alert('You already added milk!');
-        return;
-      }
-      const milkType = draggedIngredient.dataset['milkType'];
-      const milkTemp = draggedIngredient.dataset['temp'];
-      droppedIngredients.milk = { type: milkType, temp: milkTemp };
-      addIngredientToCup(`${capitalize(milkTemp)} ${milkType} milk`);
-      checkIfComplete();
-      return;
-    }
-  });
-
-  // Add ingredient label to cup area
-  function addIngredientToCup(text) {
-    const div = document.createElement('div');
-    div.classList.add('dropped-ingredient');
-    div.textContent = text;
-    cupDropArea.appendChild(div);
-  }
-
-  // Capitalize helper
-  function capitalize(s) {
-    if (!s) return '';
-    return s.charAt(0).toUpperCase() + s.slice(1);
-  }
-
-  // Check if all ingredients added correctly
-  function checkIfComplete() {
-    if (
-      droppedIngredients.espresso &&
-      droppedIngredients.vanilla !== null &&
-      droppedIngredients.milk
-    ) {
-      // Check correctness
-      const o = currentOrder;
-
-      if (
-        droppedIngredients.espresso.type !== o.espresso.type ||
-        droppedIngredients.espresso.count !== o.espresso.count
-      ) {
-        alert('Espresso shots are incorrect. Try again.');
-        resetIngredients();
-        return;
-      }
-      if (droppedIngredients.vanilla !== o.vanillaPumps) {
-        alert('Vanilla pumps count is incorrect. Try again.');
-        resetIngredients();
-        return;
-      }
-      if (
-        droppedIngredients.milk.type !== o.milk.type ||
-        droppedIngredients.milk.temp !== o.milk.temp
-      ) {
-        alert('Milk selection is incorrect. Try again.');
-        resetIngredients();
-        return;
-      }
-
-      // Success!
-      result.textContent = `✅ You made a perfect ${o.cupSize} ${o.cupTemp} ${o.name}!`;
-      nextOrderBtn.style.display = 'inline-block';
-      ingredientsContainer.style.display = 'none';
-    }
-  }
-
-  // Reset ingredients if wrong
-  function resetIngredients() {
-    droppedIngredients = { espresso: null, vanilla: 0, milk: null };
-    cupDropArea.querySelectorAll('.dropped-ingredient').forEach(el => el.remove());
-  }
-
-  // Load next order
-  nextOrderBtn.addEventListener('click', () => {
-    currentIndex++;
-    if (currentIndex >= orders.length) currentIndex = 0;
-    currentOrder = orders[currentIndex];
-    cupSelected = null;
-
-    // Reset UI
-    orderInstruction.textContent = `Select the cup for your order: ${currentOrder.cupSize} ${currentOrder.cupTemp} ${currentOrder.name}`;
-    result.textContent = '';
-    nextOrderBtn.style.display = 'none';
-    ingredientsContainer.style.display = 'none';
-    cupDropArea.style.display = 'none';
-
-    // Reset cup styles and show all cups again
-    cupsData.forEach(cup => {
-      const elem = document.getElementById(cup.id);
-      if (elem) {
-        elem.style.display = 'flex';
-        elem.classList.remove('selected-cup');
-      }
-    });
- 
+<di
