@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Barista Coffee Maker Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 480px;
+    margin: 20px auto;
+    padding: 0 15px;
+  }
+  h2, h3 {
+    color: #4b2e05;
+  }
+  select, input[type=number], button {
+    font-size: 1rem;
+    margin: 5px 0 15px 0;
+  }
+  button {
+    cursor: pointer;
+    padding: 6px 12px;
+    border: 2px solid #4b2e05;
+    background: #fff8f0;
+    color: #4b2e05;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+  button.selected {
+    background-color: #d4a373;
+    color: #fff;
+    border-color: #c06c4c;
+  }
+  #result {
+    font-weight: bold;
+    margin-top: 15px;
+    min-height: 1.5em;
+  }
+  label {
+    display: block;
+    margin-top: 8px;
+  }
+  input[type=number] {
+    width: 60px;
+  }
+</style>
+</head>
+<body>
+
+<h2 id="orderInstruction">Loading order...</h2>
+
+<!-- Step 1: Cup selection -->
+<div>
+  <h3>Select your cup:</h3>
+  <label>
+    Size:
+    <select id="cupSize">
+      <option value="">--Size--</option>
+      <option value="Small">Small</option>
+      <option value="Medium">Medium</option>
+      <option value="Large">Large</option>
+    </select>
+  </label>
+  <label>
+    Temperature:
+    <select id="cupTemp">
+      <option value="">--Temperature--</option>
+      <option value="Hot">Hot</option>
+      <option value="Iced">Iced</option>
+    </select>
+  </label>
+</div>
+
+<!-- Step 2: Espresso shots -->
+<div>
+  <h3>Select espresso shots:</h3>
+  <button data-type="standard" data-count="1">Standard 1 shot</button>
+  <button data-type="standard" data-count="2">Standard 2 shots</button>
+  <button data-type="standard" data-count="3">Standard 3 shots</button>
+
+  <button data-type="blonde" data-count="1">Blonde 1 shot</button>
+  <button data-type="blonde" data-count="2">Blonde 2 shots</button>
+  <button data-type="blonde" data-count="3">Blonde 3 shots</button>
+
+  <button data-type="decaf" data-count="1">Decaf 1 shot</button>
+  <button data-type="decaf" data-count="2">Decaf 2 shots</button>
+  <button data-type="decaf" data-count="3">Decaf 3 shots</button>
+</div>
+
+<!-- Step 3: Vanilla pumps -->
+<div>
+  <h3>Add vanilla pumps:</h3>
+  <input type="number" id="vanillaPumps" min="0" max="10" value="0" />
+</div>
+
+<!-- Step 4: Milk selection -->
+<div>
+  <h3>Select milk:</h3>
+  <label>
+    Type:
+    <select id="milkType">
+      <option value="">--Type--</option>
+      <option value="whole">Whole</option>
+      <option value="coconut">Coconut</option>
+      <option value="2%">2%</option>
+      <option value="soy">Soy</option>
+      <option value="almond">Almond</option>
+      <option value="oat">Oat</option>
+    </select>
+  </label>
+  <label>
+    Temperature:
+    <select id="milkTemp">
+      <option value="">--Temperature--</option>
+      <option value="steamed">Steamed</option>
+      <option value="cold">Cold</option>
+    </select>
+  </label>
+</div>
+
+<button id="submitOrder">Submit Order</button>
+<button id="nextOrder" style="display:none; margin-left:10px;">Next Order</button>
+
+<p id="result"></p>
+
+<script>
+  const orders = [
+    {
+      name: "Vanilla Latte",
+      cupSize: "Medium",
+      cupTemp: "Hot",
+      espresso: { type: "standard", count: 2 },
+      vanillaPumps: 4,
+      milk: { type: "2%", temp: "steamed" }
+    },
+    {
+      name: "Iced Coconut Macchiato",
+      cupSize: "Large",
+      cupTemp: "Iced",
+      espresso: { type: "blonde", count: 3 },
+      vanillaPumps: 2,
+      milk: { type: "coconut", temp: "cold" }
+    },
+    {
+      name: "Decaf Flat White",
+      cupSize: "Small",
+      cupTemp: "Hot",
+      espresso: { type: "decaf", count: 2 },
+      vanillaPumps: 0,
+      milk: { type: "whole", temp: "steamed" }
+    },
+    // Add more recipes here if you want
+  ];
+
+  let currentIndex = 0;
+  let currentOrder = orders[currentIndex];
+
+  const orderInstruction = document.getElementById('orderInstruction');
+  const result = document.getElementById('result');
+
+  const cupSizeSelect = document.getElementById('cupSize');
+  const cupTempSelect = document.getElementById('cupTemp');
+
+  const espressoButtons = document.querySelectorAll('button[data-type][data-count]');
+
+  const vanillaInput = document.getElementById('vanillaPumps');
+
+  const milkTypeSelect = document.getElementById('milkType');
+  const milkTempSelect = document.getElementById('milkTemp');
+
+  const submitBtn = document.getElementById('submitOrder');
+  const nextBtn = document.getElementById('nextOrder');
+
+  // Initialize order display and clear inputs
+  function loadOrder() {
+    currentOrder = orders[currentIndex];
+    orderInstruction.textContent = `Make a ${currentOrder.cupSize} ${currentOrder.cupTemp} ${currentOrder.name}`;
+
+    // Reset inputs
+    cupSizeSelect.value = "";
+    cupTempSelect.value = "";
+    vanillaInput.value = 0;
+    milkTypeSelect.value = "";
+    milkTempSelect.value = "";
+    result.textContent = "";
+
+    espressoButtons.forEach(btn => btn.classList.remove('selected'));
+
+    submitBtn.style.display = "inline-block";
+    nextBtn.style.display = "none";
+  }
+
+  // Espresso button toggle logic
+  espressoButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      espressoButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+
+  // Check player input against current order
+  submitBtn.addEventListener('click', () => {
+    const cupSize = cupSizeSelect.value;
+    const cupTemp = cupTempSelect.value;
+
+    let selectedEspresso = null;
+    espressoButtons.forEach(btn => {
+      if (btn.classList.contains('selected')) {
+        selectedEspresso = { type: btn.getAttribute('data-type'), count: Number(btn.getAttribute('data-count')) };
+      }
+    });
+
+    const vanillaPumps = Number(vanillaInput.value);
+
+    const milkType = milkTypeSelect.value;
+    const milkTemp = milkTempSelect.value;
+
+    // Validation
+    if (!cupSize || !cupTemp) {
+      result.textContent = "Please select cup size and temperature.";
+      return;
+    }
+
+    if (!selectedEspresso) {
+      result.textContent = "Please select espresso shots.";
+      return;
+    }
+
+    if (!milkType || !milkTemp) {
+      result.textContent = "Please select milk type and temperature.";
+      return;
+    }
+
+    if (cupSize !== currentOrder.cupSize || cupTemp !== currentOrder.cupTemp) {
+      result.textContent = "Cup size or temperature incorrect.";
+      return;
+    }
+
+    if (selectedEspresso.type !== currentOrder.espresso.type || selectedEspresso.count !== currentOrder.espresso.count) {
+      result.textContent = "Espresso selection incorrect.";
+      return;
+    }
+
+    if (vanillaPumps !== currentOrder.vanillaPumps) {
+      result.textContent = "Vanilla pumps count incorrect.";
+      return;
+    }
+
+    if (milkType !== currentOrder.milk.type || milkTemp !== currentOrder.milk.temp) {
+      result.textContent = "Milk selection incorrect.";
+      return;
+    }
+
+    result.textContent = `✅ Perfect! You made a ${currentOrder.cupSize} ${currentOrder.cupTemp} ${currentOrder.name}!`;
+
+    submitBtn.style.display = "none";
+    nextBtn.style.display = "inline-block";
+  });
+
+  // Next order button logic
+  nextBtn.addEventListener('click', () => {
+    currentIndex++;
+    if (currentIndex >= orders.length) currentIndex = 0; // loop back to first order
+    loadOrder();
+  });
+
+  // Load first order on page load
+  loadOrder();
+</script>
+
+</body>
+</html>
