@@ -18,15 +18,13 @@
     margin-bottom: 20px;
   }
   #cup-selection {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-bottom: 30px;
   }
   .cup {
     width: 60px;
-    height: 100px;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -47,6 +45,7 @@
   .cup.large { height: 140px; }
   .cup.medium { height: 120px; }
   .cup.small { height: 100px; }
+
   #game-area {
     display: flex;
     gap: 40px;
@@ -62,6 +61,7 @@
     border: 2px dashed #aaa;
     font-size: 18px;
     color: #555;
+    flex-direction: column;
   }
   #ingredients {
     flex: 1;
@@ -78,6 +78,10 @@
   }
   .hidden {
     display: none;
+  }
+  .enlarged-cup {
+    transform: scale(1.8);
+    width: 100px !important;
   }
 </style>
 </head>
@@ -111,9 +115,15 @@
       const size = cup.dataset.size;
       const temp = cup.dataset.temp;
       if (size === correctCup.size && temp === correctCup.temp) {
-        document.getElementById('cup-selection').classList.add('hidden');
+        document.getElementById('cup-selection').innerHTML = ''; // clear all cups
+
+        // enlarge selected cup and add to left
+        cup.classList.add('enlarged-cup');
+        const selectedArea = document.getElementById('selected-cup');
+        selectedArea.innerHTML = '';
+        selectedArea.appendChild(cup);
+
         document.getElementById('game-area').classList.remove('hidden');
-        document.getElementById('selected-cup').textContent = `${size} ${temp} Cup`; 
       } else {
         alert("Wrong cup! Try again.");
       }
@@ -134,7 +144,9 @@
     const value = e.dataTransfer.getData('text/plain');
     if (correctIngredients.includes(value) && !addedIngredients.includes(value)) {
       addedIngredients.push(value);
-      dropZone.innerHTML += `<br>${value.replace(/(standard|vanilla|%|steamed)/g, ' ').trim()}`;
+      const p = document.createElement('p');
+      p.textContent = value.replace(/(standard|vanilla|%|steamed)/g, ' ').trim();
+      dropZone.appendChild(p);
       if (addedIngredients.length === correctIngredients.length) {
         document.getElementById('result').textContent = "✅ Correct! You made the drink!";
       }
