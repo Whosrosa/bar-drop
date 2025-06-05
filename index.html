@@ -1,113 +1,512 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Barista Drag & Drop Game</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #f0f0f0;
-  }
-  h1 {
-    text-align: center;
-  }
-  #orders {
-    margin-bottom: 20px;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  .cups {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  .cup {
-    width: 80px;
-    height: 140px;
-    border: 2px solid #444;
-    border-radius: 15px;
-    background: #fff;
-    text-align: center;
-    line-height: 140px;
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-    font-weight: bold;
-    color: #555;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-  }
-  .cup.selected {
-    border-color: #007bff;
-    box-shadow: 0 0 10px #007bff;
-  }
-  #ingredients {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .ingredient {
-    width: 60px;
-    height: 60px;
-    background: #eee;
-    border: 2px solid #666;
-    border-radius: 8px;
-    text-align: center;
-    line-height: 60px;
-    cursor: grab;
-    user-select: none;
-    font-weight: bold;
-    color: #333;
-  }
-  .ingredient.dragging {
-    opacity: 0.5;
-  }
-  #cup-drop-area {
-    width: 100px;
-    height: 140px;
-    border: 3px dashed #888;
-    border-radius: 15px;
-    margin: 0 auto 20px auto;
-    background: #fff;
-    position: relative;
-  }
-  #cup-drop-area .drop-text {
-    position: absolute;
-    width: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    color: #aaa;
-    font-style: italic;
-  }
-  #dropped-ingredients {
-    min-height: 30px;
-    margin-top: 5px;
-    font-size: 14px;
-    color: #444;
-    text-align: center;
-  }
-  #next-order-btn {
-    display: block;
-    margin: 0 auto;
-    padding: 10px 20px;
-    font-size: 16px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
-    visibility: hidden;
-  }
-  #next-order-btn:hover {
-    background: #0056b3;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Barista Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 0 15px;
+      background: #f5f0ea;
+      color: #4b2e05;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    #cupSelection {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .cup {
+      width: 90px;
+      height: 120px;
+      border-radius: 15px;
+      border: 3px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      user-select: none;
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgb(0 0 0 / 0.15);
+    }
+    .hot {
+      background: linear-gradient(180deg, #5a3e1b 0%, #e6cfa8 100%);
+      color: #3d260b;
+    }
+    .iced {
+      background: linear-gradient(180deg, #b0d9d9 0%, #e0f1f1 100%);
+      color: #234d4d;
+    }
+    .label {
+      background: rgba(255 255 255 / 0.8);
+      padding: 2px 6px;
+      border-radius: 6px 6px 0 0;
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      user-select: none;
+    }
+    .cup.selected {
+      border-color: #c06c4c;
+      box-shadow: 0 0 15px #c06c4c;
+      transform: scale(1.3);
+      z-index: 10;
+    }
+    #chosenCupContainer {
+      float: left;
+      margin-right: 30px;
+      min-width: 130px;
+      height: 160px;
+      position: relative;
+    }
+    #chosenCup {
+      width: 130px;
+      height: 180px;
+      border-radius: 20px;
+      background: #eee;
+      box-shadow: 0 0 15px #c06c4c inset;
+      position: relative;
+      user-select: none;
+    }
+    #chosenCup.hot {
+      background: linear-gradient(180deg, #5a3e1b 0%, #e6cfa8 100%);
+      color: #3d260b;
+      box-shadow: 0 0 15px #c06c4c inset;
+    }
+    #chosenCup.iced {
+      background: linear-gradient(180deg, #b0d9d9 0%, #e0f1f1 100%);
+      color: #234d4d;
+      box-shadow: 0 0 15px #369494 inset;
+    }
+
+    #ingredientArea {
+      margin-left: 170px;
+      min-height: 200px;
+    }
+    .ingredient {
+      width: 100px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fff8f0;
+      border: 2px solid #c06c4c;
+      border-radius: 10px;
+      cursor: grab;
+      user-select: none;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .ingredient.dragging {
+      opacity: 0.6;
+      cursor: grabbing;
+      z-index: 1000;
+      position: absolute;
+    }
+    #dropZone {
+      position: relative;
+      width: 130px;
+      height: 180px;
+      margin-top: 10px;
+      border: 3px dashed #c06c4c;
+      border-radius: 20px;
+      background: transparent;
+    }
+    #droppedIngredients {
+      position: absolute;
+      top: 15px;
+      left: 10px;
+      right: 10px;
+      bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      pointer-events: none;
+      font-weight: bold;
+      font-size: 12px;
+      color: #4b2e05;
+      text-align: center;
+    }
+    #message {
+      clear: both;
+      margin-top: 25px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: green;
+      text-align: center;
+    }
+    #nextOrderBtn {
+      display: block;
+      margin: 20px auto 0;
+      padding: 10px 20px;
+      font-size: 1.1rem;
+      background: #c06c4c;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #nextOrderBtn:hover {
+      background: #a05234;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Barista Drag & Drop Game</h1>
+<h2 id="orderText">Loading order...</h2>
 
-<di
+<div id="cupSelection">
+  <!-- Cups inserted by JS -->
+</div>
+
+<div id="chosenCupContainer" style="display:none;">
+  <div id="chosenCup"></div>
+  <div id="dropZone">
+    <div id="droppedIngredients"></div>
+  </div>
+</div>
+
+<div id="ingredientArea" style="display:none;">
+  <h3>Drag ingredients onto your cup:</h3>
+  <div id="ingredientsList">
+    <!-- Ingredients inserted by JS -->
+  </div>
+</div>
+
+<div id="message"></div>
+<button id="nextOrderBtn" style="display:none;">Next Order</button>
+
+<script>
+  // Recipes
+  const orders = [
+    {
+      name: "Vanilla Latte",
+      cupSize: "Medium",
+      cupTemp: "Hot",
+      espresso: { type: "standard", count: 2 },
+      vanillaPumps: 4,
+      milk: { type: "2%", temp: "steamed" }
+    },
+    {
+      name: "Iced Coconut Macchiato",
+      cupSize: "Large",
+      cupTemp: "Iced",
+      espresso: { type: "blonde", count: 3 },
+      vanillaPumps: 2,
+      milk: { type: "coconut", temp: "cold" }
+    },
+    {
+      name: "Decaf Flat White",
+      cupSize: "Small",
+      cupTemp: "Hot",
+      espresso: { type: "decaf", count: 2 },
+      vanillaPumps: 0,
+      milk: { type: "whole", temp: "steamed" }
+    }
+  ];
+
+  const cupSizes = ["Small", "Medium", "Large"];
+  const cupTemps = ["Hot", "Iced"];
+
+  // Global game state
+  let currentOrderIndex = 0;
+  let currentOrder = null;
+  let cupSelected = false;
+
+  // Track which ingredients have been correctly dropped
+  const addedIngredients = {
+    espresso: false,
+    vanilla: false,
+    milk: false
+  };
+
+  // DOM refs
+  const orderText = document.getElementById("orderText");
+  const cupSelection = document.getElementById("cupSelection");
+  const chosenCupContainer = document.getElementById("chosenCupContainer");
+  const chosenCup = document.getElementById("chosenCup");
+  const dropZone = document.getElementById("dropZone");
+  const droppedIngredients = document.getElementById("droppedIngredients");
+  const ingredientArea = document.getElementById("ingredientArea");
+  const ingredientsList = document.getElementById("ingredientsList");
+  const message = document.getElementById("message");
+  const nextOrderBtn = document.getElementById("nextOrderBtn");
+
+  // Build cup selection UI
+  function buildCupSelection() {
+    cupSelection.innerHTML = "";
+    cupSizes.forEach(size => {
+      cupTemps.forEach(temp => {
+        const cupDiv = document.createElement("div");
+        cupDiv.classList.add("cup");
+        cupDiv.classList.add(temp.toLowerCase());
+        cupDiv.dataset.size = size;
+        cupDiv.dataset.temp = temp;
+        cupDiv.textContent = `${size} ${temp}`;
+        cupSelection.appendChild(cupDiv);
+
+        cupDiv.addEventListener("click", () => {
+          if (cupSelected) return; // only allow one selection
+          handleCupSelection(cupDiv);
+        });
+      });
+    });
+  }
+
+  // Handle cup click
+  function handleCupSelection(selectedCup) {
+    const size = selectedCup.dataset.size;
+    const temp = selectedCup.dataset.temp;
+    if (size === currentOrder.cupSize && temp === currentOrder.cupTemp) {
+      // Correct cup selected
+      cupSelected = true;
+      message.textContent = "Cup selected correctly! Now drag the ingredients.";
+      // Highlight selected cup and enlarge
+      selectedCup.classList.add("selected");
+
+      // Remove other cups
+      [...cupSelection.children].forEach(cup => {
+        if (cup !== selectedCup) {
+          cup.style.display = "none";
+        }
+      });
+
+      // Show chosen cup container on left
+      chosenCupContainer.style.display = "block";
+      chosenCup.className = ""; // reset classes
+      chosenCup.classList.add(temp.toLowerCase());
+      chosenCup.textContent = `${size} ${temp}`;
+
+      // Hide cup selection area (can keep it hidden or keep visible but non-interactive)
+      // cupSelection.style.display = "none";
+
+      // Show ingredients area
+      ingredientArea.style.display = "block";
+
+      // Setup draggable ingredients
+      setupIngredients();
+
+    } else {
+      message.textContent = "Wrong cup. Try again.";
+    }
+  }
+
+  // Ingredient definitions for drag/drop
+  function setupIngredients() {
+    ingredientsList.innerHTML = "";
+
+    // Espresso shots buttons (different types and counts)
+    const espressoOptions = [
+      { type: "standard", count: 1, label: "Standard 1 shot" },
+      { type: "standard", count: 2, label: "Standard 2 shots" },
+      { type: "standard", count: 3, label: "Standard 3 shots" },
+      { type: "blonde", count: 1, label: "Blonde 1 shot" },
+      { type: "blonde", count: 2, label: "Blonde 2 shots" },
+      { type: "blonde", count: 3, label: "Blonde 3 shots" },
+      { type: "decaf", count: 1, label: "Decaf 1 shot" },
+      { type: "decaf", count: 2, label: "Decaf 2 shots" },
+      { type: "decaf", count: 3, label: "Decaf 3 shots" },
+    ];
+
+    espressoOptions.forEach(opt => {
+      const div = document.createElement("div");
+      div.classList.add("ingredient");
+      div.textContent = opt.label;
+      div.dataset.category = "espresso";
+      div.dataset.type = opt.type;
+      div.dataset.count = opt.count;
+      ingredientsList.appendChild(div);
+
+      makeDraggable(div);
+    });
+
+    // Vanilla pumps (0 to 10)
+    for(let pumps=1; pumps<=6; pumps++){
+      const div = document.createElement("div");
+      div.classList.add("ingredient");
+      div.textContent = `${pumps} Vanilla Pump${pumps > 1 ? "s" : ""}`;
+      div.dataset.category = "vanilla";
+      div.dataset.count = pumps;
+      ingredientsList.appendChild(div);
+      makeDraggable(div);
+    }
+
+    // Milk options
+    const milkTypes = ["whole", "coconut", "2%", "soy", "almond", "oat"];
+    const milkTemps = ["steamed", "cold"];
+
+    milkTypes.forEach(type => {
+      milkTemps.forEach(temp => {
+        const div = document.createElement("div");
+        div.classList.add("ingredient");
+        div.textContent = `${temp.charAt(0).toUpperCase()+temp.slice(1)} ${type} milk`;
+        div.dataset.category = "milk";
+        div.dataset.type = type;
+        div.dataset.temp = temp;
+        ingredientsList.appendChild(div);
+        makeDraggable(div);
+      });
+    });
+  }
+
+  // Drag & Drop logic
+  let draggedElem = null;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  function makeDraggable(elem) {
+    elem.addEventListener("mousedown", (e) => {
+      if (!cupSelected) return; // only after cup selection
+      draggedElem = elem;
+      draggedElem.classList.add("dragging");
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+
+      // Bring to front
+      draggedElem.style.position = "absolute";
+      draggedElem.style.zIndex = "1000";
+      document.body.appendChild(draggedElem);
+      moveAt(e.pageX, e.pageY);
+      e.preventDefault();
+    });
+
+    function moveAt(pageX, pageY) {
+      draggedElem.style.left = pageX - offsetX + "px";
+      draggedElem.style.top = pageY - offsetY + "px";
+    }
+
+    function onMouseMove(e) {
+      if (!draggedElem) return;
+      moveAt(e.pageX, e.pageY);
+    }
+
+    function onMouseUp(e) {
+      if (!draggedElem) return;
+
+      // Check if dropped inside dropZone
+      const dzRect = dropZone.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+
+      if (
+        x >= dzRect.left &&
+        x <= dzRect.right &&
+        y >= dzRect.top &&
+        y <= dzRect.bottom
+      ) {
+        // Check correctness
+        const isCorrect = checkIngredientCorrect(draggedElem);
+
+        if (isCorrect) {
+          addIngredientToCup(draggedElem);
+          draggedElem.remove();
+          checkIfOrderComplete();
+        } else {
+          // Return to original spot
+          resetIngredientPosition(draggedElem);
+          message.textContent = "Wrong ingredient or amount. Try again.";
+          setTimeout(() => message.textContent = "", 2000);
+        }
+      } else {
+        // Return ingredient back if not dropped on cup
+        resetIngredientPosition(draggedElem);
+      }
+
+      draggedElem.classList.remove("dragging");
+      draggedElem = null;
+
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    }
+
+    elem.addEventListener("dragstart", e => e.preventDefault()); // prevent default drag
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }
+
+  // Reset ingredient position to list
+  function resetIngredientPosition(elem) {
+    elem.style.position = "";
+    elem.style.left = "";
+    elem.style.top = "";
+    elem.style.zIndex = "";
+    ingredientsList.appendChild(elem);
+  }
+
+  // Check if dragged ingredient matches order
+  function checkIngredientCorrect(elem) {
+    const cat = elem.dataset.category;
+
+    if(cat === "espresso"){
+      if(addedIngredients.espresso) return false; // already added
+      return elem.dataset.type === currentOrder.espresso.type && Number(elem.dataset.count) === currentOrder.espresso.count;
+    }
+
+    if(cat === "vanilla"){
+      if(addedIngredients.vanilla) return false;
+      return Number(elem.dataset.count) === currentOrder.vanillaPumps;
+    }
+
+    if(cat === "milk"){
+      if(addedIngredients.milk) return false;
+      return elem.dataset.type === currentOrder.milk.type && elem.dataset.temp === currentOrder.milk.temp;
+    }
+
+    return false;
+  }
+
+  // Add ingredient text inside the cup
+  function addIngredientToCup(elem) {
+    const cat = elem.dataset.category;
+    let text = "";
+
+    if(cat === "espresso"){
+      text = `${elem.dataset.count} ${capitalize(elem.dataset.type)} espresso shot${elem.dataset.count > 1 ? "s" : ""}`;
+      addedIngredients.espresso = true;
+    } else if(cat === "vanilla"){
+      text = `${elem.dataset.count} vanilla pump${elem.dataset.count > 1 ? "s" : ""}`;
+      addedIngredients.vanilla = true;
+    } else if(cat === "milk"){
+      text = `${capitalize(elem.dataset.temp)} ${elem.dataset.type} milk`;
+      addedIngredients.milk = true;
+    }
+
+    const p = document.createElement("p");
+    p.textContent = text;
+    droppedIngredients.appendChild(p);
+  }
+
+  // Check if all ingredients added
+  function checkIfOrderComplete() {
+    if(addedIngredients.espresso && addedIngredients.vanilla && addedIngredients.milk) {
+      message.style.color = "green";
+      message.textContent = `✅ You made the perfect ${currentOrder.cupSize} ${currentOrder.cupTemp} ${currentOrder.name}!`;
+      nextOrderBtn.style.display = "block";
+      ingredientArea.style.display = "none";
+    }
+  }
+
+  // Utility
+  function capitalize(str) {
+    if(!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  // Load next order
+  function loadOrder() {
+   
